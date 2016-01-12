@@ -8,8 +8,6 @@ import json, datetime, os
 
 from flask_slackbot import SlackBot
 
-BASE_URL = 'http://fjolsmidjan.is/fjolsmidjan_matsedill_vikunnar'
-
 app = Flask(__name__)
 port = int(os.environ.get('PORT', 33507))
 
@@ -44,14 +42,8 @@ class GreasyWeek:
         itemlist = ""
         for i in self.items:
             itemlist += "  %s:\n    %s\n    %s\n" % (i.day, i.main, i.soup)
-
         return slack_response(self.week, itemlist)
 
-    def print_menu(self):
-        """Useful print function for the week menu"""
-        print("%s" % self.week)
-        for i in self.items:
-            print(" %s\n  %s\n  %s" % (i.day, i.main, i.soup))
 
 class GreasyMenu:
     """Object for the days menu"""
@@ -61,6 +53,7 @@ class GreasyMenu:
         self.soup = soup
 
     def slackize(self):
+        """Make menu ready for posting on slack"""
         text = "%s\n  %s" % (self.main, self.soup)
         return slack_response(self.day, text)
 
@@ -73,6 +66,7 @@ class GreasyMenu:
         })
 
 def slack_response(title, text):
+    """Makes Slack-ready jsonified response"""
     return jsonify({
          "response_type": "in_channel",
          "attachments": [
@@ -83,14 +77,14 @@ def slack_response(title, text):
          ]
     })
 
-def make_soup(url):
-    """Get page and save the soup"""
-    html = urlopen(url).read()
+def make_soup():
+    """Get page and return beautiful soup"""
+    html = urlopen('http://fjolsmidjan.is/fjolsmidjan_matsedill_vikunnar').read()
     return BeautifulSoup(html, "lxml")
 
-def get_menu(url):
+def get_menu():
     """Scrape the menu page"""
-    soup = make_soup(url)
+    soup = make_soup()
     menu = GreasyWeek()
     n = 0
     for i in soup.findAll("p", {"class":"rtecenter"}):
@@ -107,7 +101,8 @@ def get_menu(url):
     return menu
 
 def get_menu_item(day):
-    menu = get_menu(BASE_URL)
+    """Gets menu item for selected day"""
+    menu = get_menu()
     if day < 5:
         return menu.items[day]
     else:
@@ -128,24 +123,24 @@ def tomorrow():
 @app.route("/week")
 def week():
     """The menu of the week"""
-    return get_menu(BASE_URL).serialize()
+    return get_menu().serialize()
 
 @app.route("/slack/today", methods=["POST"])
 def slToday():
-    """The menu items of the day"""
+    """The menu items of the day for Slack"""
     day = datetime.datetime.today().weekday()
     return get_menu_item(day).slackize()
 
 @app.route("/slack/tomorrow", methods=["POST"])
 def slTomorrow():
-    """The menu items of the day"""
+    """The menu items of the day for Slack"""
     day = datetime.datetime.today().weekday() + 1
     return get_menu_item(day).slackize()
 
 @app.route("/slack/week", methods=["POST"])
 def slWeek():
-    """The menu of the week"""
-    return get_menu(BASE_URL).slackize()
+    """The menu of the week for Slack"""
+    return get_menu().slackize()
 
 
 if __name__ == "__main__":
