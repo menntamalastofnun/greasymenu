@@ -39,6 +39,15 @@ class GreasyWeek:
             'week': self.week},
             indent=4)
 
+    def slackize(self):
+        """Format object as json"""
+        itemlist = self.week + "\n"
+        for i in self.items:
+            itemlist += "  %s:\n    %s\n    %s\n" % (i.day, i.main, i.soup)
+        return json.dumps({
+            'text': itemlist
+            }, indent=4)
+
     def print_menu(self):
         """Useful print function for the week menu"""
         print("%s" % self.week)
@@ -51,6 +60,12 @@ class GreasyMenu:
         self.day = day
         self.main = main
         self.soup = soup
+
+    def slackize(self):
+        text = "%s:\n  %s\n  %s" % (self.day, self.main, self.soup)
+        return json.dumps({
+            "text":text
+        }, indent=4)
 
     def serialize(self):
         """Format object as json"""
@@ -81,7 +96,6 @@ def get_menu(url):
       elif n >= 5:
         break
       n += 1
-    #menu.print_menu()
     return menu
 
 @app.route("/today")
@@ -93,12 +107,12 @@ def today():
         item = menu.items[day]
     else:
         item = "Ekkert í dag"
-    return item.serialize()
+    return item.slackize()
 
 @app.route("/week")
 def week():
     """The menu of the week"""
-    return get_menu(BASE_URL).serialize()
+    return get_menu(BASE_URL).slackize()
 
 
 if __name__ == "__main__":
