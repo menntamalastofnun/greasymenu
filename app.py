@@ -133,7 +133,7 @@ def week():
 @app.route("/slack/today", methods=["POST"])
 def slToday():
     """The menu items of the day"""
-    if request.form['token'] != 'arQAExfEBBiPFeELs4pJM3O4':
+    if request.form['token'] != 'h4xrSD9ebX3utdQRcdVPGCZ5':
         return "Error. Wrong team"
     day = datetime.datetime.today().weekday()
     return get_menu_item(day).slackize()
@@ -141,7 +141,7 @@ def slToday():
 @app.route("/slack/tomorrow", methods=["POST"])
 def slTomorrow():
     """The menu items of the day"""
-    if request.form['token'] != 'arQAExfEBBiPFeELs4pJM3O4':
+    if request.form['token'] != 'kZPdnaA2msQrn3hqUtiCPMGm':
         return "Error. Wrong team"
     day = datetime.datetime.today().weekday() + 1
     return get_menu_item(day).slackize()
@@ -149,7 +149,7 @@ def slTomorrow():
 @app.route("/slack/week", methods=["POST"])
 def slWeek():
     """The menu of the week"""
-    if request.form['token'] != 'arQAExfEBBiPFeELs4pJM3O4':
+    if request.form['token'] != 'NlUDxJQfuKnivr9pKmSvNJn1':
         return "Error. Wrong team"
     return get_menu(BASE_URL).slackize()
 
