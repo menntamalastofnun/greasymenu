@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # coding=utf-8
-from flask import Flask
+from flask import Flask, jsonify
 from bs4 import BeautifulSoup
 from urllib2 import urlopen
 from time import sleep
@@ -34,14 +34,13 @@ class GreasyWeek:
                 'main': i.main,
                 'day': i.day
                 })
-        return json.dumps({
+        return {
             'items': itemlist,
-            'week': self.week},
-            indent=4)
+            'week': self.week}
 
     def slackize(self):
         """Format object as json"""
-        itemlist = self.week + "\n"
+        itemlist = ""
         for i in self.items:
             itemlist += "  %s:\n    %s\n    %s\n" % (i.day, i.main, i.soup)
         return itemlist
@@ -65,11 +64,11 @@ class GreasyMenu:
 
     def serialize(self):
         """Format object as json"""
-        return json.dumps({
+        return {
             'soup': self.soup,
             'main': self.main,
             'day': self.day
-        }, indent=4)
+        }
 
 def make_soup(url):
     """Get page and save the soup"""
@@ -103,12 +102,38 @@ def today():
         item = menu.items[day]
     else:
         item = "Ekkert í dag"
-    return item.slackize()
+    return jsonify(item.serialize())#item.slackize()
 
 @app.route("/week")
 def week():
     """The menu of the week"""
-    return get_menu(BASE_URL).slackize()
+    return jsonify(get_menu(BASE_URL).serialize())
+
+@app.route("/slack/today")
+def slToday():
+    """The menu items of the day"""
+    menu = get_menu(BASE_URL)
+    day = datetime.datetime.today().weekday()
+    if day < 5:
+        item = menu.items[day]
+    else:
+        item = "Ekkert í dag"
+    return item.slackize()
+
+@app.route("/slack/week")
+def slWeek():
+    """The menu of the week"""
+    menu = get_menu(BASE_URL)
+    slack_response = {
+         "response_type": "in_channel",
+         "attachments": [
+             {
+                 "title": menu.week,
+                 "text": menu.slackize(),
+             }
+         ]
+    }
+    return jsonify(slack_response)
 
 
 if __name__ == "__main__":
