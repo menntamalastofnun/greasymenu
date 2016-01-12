@@ -4,7 +4,7 @@ from flask import Flask
 from bs4 import BeautifulSoup
 from urllib2 import urlopen
 from time import sleep
-import json, datetime
+import json, datetime, os
 
 from flask_slackbot import SlackBot
 
