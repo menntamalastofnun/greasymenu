@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # coding=utf-8
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from bs4 import BeautifulSoup
 from urllib2 import urlopen
 from time import sleep
@@ -146,6 +146,15 @@ def slTomorrow():
 def slWeek():
     """The menu of the week"""
     return get_menu(BASE_URL).slackize()
+
+@app.route("/slack/test", methods=["POST"])
+def slTest():
+    """The menu of the week"""
+    if request.form['token'] != 'arQAExfEBBiPFeELs4pJM3O4':
+        return "Error. Wrong team"
+
+    return get_menu(BASE_URL).slackize()
+    
 
 
 if __name__ == "__main__":
