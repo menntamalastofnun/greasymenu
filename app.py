@@ -11,6 +11,7 @@ from flask_slackbot import SlackBot
 BASE_URL = 'http://fjolsmidjan.is/fjolsmidjan_matsedill_vikunnar'
 
 app = Flask(__name__)
+port = int(os.environ.get('PORT', 33507))
 
 def make_soup(url):
     html = urlopen(url).read()
