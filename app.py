@@ -44,9 +44,7 @@ class GreasyWeek:
         itemlist = self.week + "\n"
         for i in self.items:
             itemlist += "  %s:\n    %s\n    %s\n" % (i.day, i.main, i.soup)
-        return json.dumps({
-            'text': itemlist
-            }, indent=4)
+        return itemlist
 
     def print_menu(self):
         """Useful print function for the week menu"""
@@ -63,9 +61,7 @@ class GreasyMenu:
 
     def slackize(self):
         text = "%s:\n  %s\n  %s" % (self.day, self.main, self.soup)
-        return json.dumps({
-            "text":text
-        }, indent=4)
+        return text
 
     def serialize(self):
         """Format object as json"""
