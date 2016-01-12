@@ -81,7 +81,7 @@ def get_menu(url):
       elif n >= 5:
         break
       n += 1
-    menu.print_menu()
+    #menu.print_menu()
     return menu
 
 @app.route("/today")
