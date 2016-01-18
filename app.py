@@ -89,7 +89,7 @@ def get_menu():
     n = 0
     for i in soup.findAll("p", {"class":"rtecenter"}):
       if n == 0:
-        menu.set_week(i.find("span").get_text())
+        menu.set_week(i.find("strong").get_text())
         item = GreasyMenu(i.findAll("strong")[1].get_text(), i.get_text().split("\n")[1], i.get_text().split("\n")[2])
         menu.add_item(item)
       elif n > 0 and n < 5:
