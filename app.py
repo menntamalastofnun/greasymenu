@@ -89,13 +89,12 @@ def get_menu():
     n = 0
     for i in soup.findAll("p", {"class":"rtecenter"}):
       if n == 0:
-        menu.set_week(i.find("strong").get_text())
-        item = GreasyMenu(i.findAll("strong")[1].get_text(), i.get_text().split("\n")[1], i.get_text().split("\n")[2])
+        menu.set_week(i.get_text())
+      elif n > 0 and n < 6:
+        i3 = i.get_text().split("\n")
+        item = GreasyMenu(i3[0], i3[1], i3[2])
         menu.add_item(item)
-      elif n > 0 and n < 5:
-        item = GreasyMenu(i.findAll("strong")[0].get_text(), i.get_text().split("\n")[1], i.get_text().split("\n")[2])
-        menu.add_item(item)
-      elif n >= 5:
+      elif n >= 6:
         break
       n += 1
     return menu
