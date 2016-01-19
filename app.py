@@ -141,6 +141,12 @@ def slWeek():
     """The menu of the week for Slack"""
     return get_menu().slackize()
 
+@app.route("/slack/help", methods=["POST"])
+def slHelp():
+    """"Sends available commands"""
+    text = "Hvað er í matinn?\nHvað er í matinn á morgun?\nMatseðill vikunnar?"
+    return slack_response("Skipanir", text)
+
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=port, debug=True)
