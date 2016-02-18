@@ -4,6 +4,7 @@ from flask import Flask, jsonify, request
 from bs4 import BeautifulSoup
 from urllib2 import urlopen
 from time import sleep
+from datetime import date, timedelta
 import json, datetime, os, re
 
 from flask_slackbot import SlackBot
@@ -84,14 +85,18 @@ def make_soup():
 
 def get_menu():
     """Scrape the menu page"""
+    months = [u'',u'Janúar',u'Febrúar',u'Mars',u'Apríl',u'Maí',u'Júní',u'Júlí',u'Ágúst',u'September',u'Október',u'Nóvember',u'Desember']
     soup = make_soup()
     menu = GreasyWeek()
-    n = 0
+    weekday = datetime.datetime.today().weekday()
+    firstday = datetime.datetime.today().date() - timedelta(days=weekday)
+    lastday = firstday + timedelta(days=4)
+    menu.set_week("Vikan %s. - %s. %s" % (str(firstday.day), str(lastday.day), months[datetime.datetime.today().month]))
     for i in soup.findAll(text=re.compile(ur'.*(M\xe1nu|\xderi\xf0ju|Mi\xf0viku|Fimmtu|F\xf6stu)dagur.*', re.UNICODE)):
-        day = i.parent.get_text()
+        day = i.parent.get_text().strip()
         main = i.parent.nextSibling.nextSibling
         soup = main.nextSibling.nextSibling
-        item = GreasyMenu(day, main, soup)
+        item = GreasyMenu(day, main.strip(), soup.strip())
         menu.add_item(item)
     return menu
 
@@ -106,13 +111,13 @@ def get_menu_item(day):
 @app.route("/today")
 def today():
     """The menu items of the day"""
-    day = datetime.datetime.today().weekday()
+    day = date.today().weekday()
     return get_menu_item(day).serialize()
 
 @app.route("/tomorrow")
 def tomorrow():
     """The menu items of tomorrow"""
-    day = datetime.datetime.today().weekday() + 1
+    day = date.today().weekday() + 1
     return get_menu_item(day).serialize()
 
 @app.route("/week")
@@ -123,14 +128,13 @@ def week():
 @app.route("/slack/today", methods=["POST"])
 def slToday():
     """The menu items of the day for Slack"""
-    day = datetime.datetime.today().weekday()
-    print(day)
+    day = date.today().weekday()
     return get_menu_item(day).slackize()
 
 @app.route("/slack/tomorrow", methods=["POST"])
 def slTomorrow():
     """The menu items of the day for Slack"""
-    day = datetime.datetime.today().weekday() + 1
+    day = date.today().weekday() + 1
     return get_menu_item(day).slackize()
 
 @app.route("/slack/week", methods=["POST"])
