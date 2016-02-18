@@ -4,7 +4,7 @@ from flask import Flask, jsonify, request
 from bs4 import BeautifulSoup
 from urllib2 import urlopen
 from time import sleep
-import json, datetime, os
+import json, datetime, os, re
 
 from flask_slackbot import SlackBot
 
@@ -87,16 +87,12 @@ def get_menu():
     soup = make_soup()
     menu = GreasyWeek()
     n = 0
-    for i in soup.findAll("p", {"class":"rtecenter"}):
-      if n == 0:
-        menu.set_week(i.get_text())
-      elif n > 0 and n < 6:
-        i3 = i.get_text().split("\n")
-        item = GreasyMenu(i3[0], i3[1], i3[2])
+    for i in soup.findAll(text=re.compile(ur'.*(M\xe1nu|\xderi\xf0ju|Mi\xf0viku|Fimmtu|F\xf6stu)dagur.*', re.UNICODE)):
+        day = i.parent.get_text()
+        main = i.parent.nextSibling.nextSibling
+        soup = main.nextSibling.nextSibling
+        item = GreasyMenu(day, main, soup)
         menu.add_item(item)
-      elif n >= 6:
-        break
-      n += 1
     return menu
 
 def get_menu_item(day):
@@ -128,6 +124,7 @@ def week():
 def slToday():
     """The menu items of the day for Slack"""
     day = datetime.datetime.today().weekday()
+    print(day)
     return get_menu_item(day).slackize()
 
 @app.route("/slack/tomorrow", methods=["POST"])
